@@ -41,6 +41,13 @@ dependencies:
   geolocator: ^14.1.1
   geocoding: ^5.0.0
   html: ^0.15.7
+  maplibre_gl: 0.27.1
+  sqflite: ^2.4.4
+  uuid: ^4.6.0
+  shared_preferences: ^2.5.5
+  nearby_connections: ^4.3.0
+  permission_handler: ^12.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

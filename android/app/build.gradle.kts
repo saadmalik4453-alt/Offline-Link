@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.offlinelink.offline_link"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

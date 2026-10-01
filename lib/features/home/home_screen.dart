@@ -2,15 +2,24 @@ import 'package:flutter/material.dart';
 
 import '../../core/network/connection_controller.dart';
 import '../../shared/widgets/connection_status_card.dart';
+import '../emergency/relay/nearby_relay_controller.dart';
+import '../emergency/relay/nearby_relay_screen.dart';
+import '../emergency/services/emergency_sync_controller.dart';
+import '../emergency/sos_screen.dart';
+import '../offline_map/offline_map_screen.dart';
 import '../offline_vault/offline_vault_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
     required this.connectionController,
+    required this.emergencySyncController,
+    required this.nearbyRelayController
   });
 
   final ConnectionController connectionController;
+  final EmergencySyncController emergencySyncController;
+  final NearbyRelayController nearbyRelayController;
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +41,7 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Check connection',
             onPressed: connectionController.checkInternet,
-            icon: const Icon(
-              Icons.refresh,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.refresh, color: Colors.white),
           ),
           const SizedBox(width: 8),
         ],
@@ -45,16 +51,9 @@ class HomeScreen extends StatelessWidget {
           animation: connectionController,
           builder: (context, _) {
             return ListView(
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                10,
-                20,
-                30,
-              ),
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
               children: [
-                ConnectionStatusCard(
-                  controller: connectionController,
-                ),
+                ConnectionStatusCard(controller: connectionController),
                 const SizedBox(height: 22),
                 _heroCard(),
                 const SizedBox(height: 24),
@@ -69,7 +68,7 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   'Information stored on your phone can still be '
-                      'used when the Internet disappears.',
+                  'used when the Internet disappears.',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.60),
                     fontSize: 14,
@@ -81,8 +80,7 @@ class HomeScreen extends StatelessWidget {
                   context: context,
                   icon: Icons.menu_book_rounded,
                   title: 'Offline Guides',
-                  subtitle:
-                  'Emergency information available without Internet.',
+                  subtitle: 'Emergency information available without Internet.',
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -98,10 +96,15 @@ class HomeScreen extends StatelessWidget {
                   context: context,
                   icon: Icons.map_rounded,
                   title: 'Offline Maps',
-                  subtitle:
-                  'Maps will be downloadable for emergency use.',
+                  subtitle: 'Maps will be downloadable for emergency use.',
                   onTap: () {
-                    _showComingSoon(context, 'Offline Maps');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => OfflineMapScreen(
+                          connectionController: connectionController,
+                        ),
+                      ),
+                    );
                   },
                 ),
                 const SizedBox(height: 12),
@@ -110,9 +113,18 @@ class HomeScreen extends StatelessWidget {
                   icon: Icons.sos_rounded,
                   title: 'Emergency SOS',
                   subtitle:
-                  'Messages will be queued when there is no Internet.',
+                      'Create an emergency record with your current location.',
                   onTap: () {
-                    _showComingSoon(context, 'Emergency SOS');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => SosScreen(
+                          connectionController:
+                          connectionController,
+                          emergencySyncController:
+                          emergencySyncController, nearbyRelayController: nearbyRelayController,
+                        ),
+                      ),
+                    );
                   },
                 ),
                 const SizedBox(height: 12),
@@ -121,9 +133,17 @@ class HomeScreen extends StatelessWidget {
                   icon: Icons.devices_other_rounded,
                   title: 'Nearby Relay',
                   subtitle:
-                  'Phone-to-phone emergency communication will come later.',
+                      'Phone-to-phone emergency communication will come later.',
                   onTap: () {
-                    _showComingSoon(context, 'Nearby Relay');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            NearbyRelayScreen(
+                              controller:
+                              nearbyRelayController,
+                            ),
+                      ),
+                    );
                   },
                 ),
                 const SizedBox(height: 24),
@@ -145,10 +165,7 @@ class HomeScreen extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF261111),
-            Color(0xFF151515),
-          ],
+          colors: [Color(0xFF261111), Color(0xFF151515)],
         ),
         border: Border.all(
           color: const Color(0xFFFF3B3B).withValues(alpha: 0.35),
@@ -157,11 +174,7 @@ class HomeScreen extends StatelessWidget {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.shield_rounded,
-            color: Color(0xFFFF3B3B),
-            size: 38,
-          ),
+          Icon(Icons.shield_rounded, color: Color(0xFFFF3B3B), size: 38),
           SizedBox(height: 16),
           Text(
             'Prepared for the moment\nInternet disappears.',
@@ -175,8 +188,8 @@ class HomeScreen extends StatelessWidget {
           SizedBox(height: 12),
           Text(
             'OfflineLink keeps important information '
-                'available locally and prepares your device '
-                'for future offline communication.',
+            'available locally and prepares your device '
+            'for future offline communication.',
             style: TextStyle(
               color: Color(0xFFBDBDBD),
               fontSize: 14,
@@ -209,21 +222,15 @@ class HomeScreen extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF3B3B)
-                      .withValues(alpha: 0.10),
+                  color: const Color(0xFFFF3B3B).withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(
-                  icon,
-                  color: const Color(0xFFFF5A5A),
-                  size: 25,
-                ),
+                child: Icon(icon, color: const Color(0xFFFF5A5A), size: 25),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
@@ -245,10 +252,7 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Color(0xFF666666),
-              ),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFF666666)),
             ],
           ),
         ),
@@ -262,21 +266,15 @@ class HomeScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF141414),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFF2B2B2B),
-        ),
+        border: Border.all(color: const Color(0xFF2B2B2B)),
       ),
       child: const Row(
         children: [
-          Icon(
-            Icons.storage_rounded,
-            color: Color(0xFFF4B73C),
-          ),
+          Icon(Icons.storage_rounded, color: Color(0xFFF4B73C)),
           SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Local Capsule',
@@ -287,11 +285,8 @@ class HomeScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'V1 demo data is bundled directly inside the app.',
-                  style: TextStyle(
-                    color: Color(0xFF858585),
-                    fontSize: 12,
-                  ),
+                  'Emergency records are stored locally on this device.',
+                  style: TextStyle(color: Color(0xFF858585), fontSize: 12),
                 ),
               ],
             ),
@@ -301,15 +296,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _showComingSoon(
-      BuildContext context,
-      String feature,
-      ) {
+  void _showComingSoon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          '$feature is part of the next development stage.',
-        ),
+        content: Text('$feature is part of the next development stage.'),
         behavior: SnackBarBehavior.floating,
       ),
     );
